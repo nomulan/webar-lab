@@ -1,30 +1,425 @@
 <!doctype html>
-<html lang="en">
+<html lang="mn">
   <head>
-    <title>&lt;model-viewer&gt; template</title>
+    <title>WebAR Lab - Mongolian Warrior</title>
     <meta charset="utf-8">
-    <meta name="description" content="&lt;model-viewer&gt; template">
+    <meta name="description" content="WebAR Experiment - Mongolian Warrior">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+      /* ─── CSS Variables ─── */
+      :root {
+        --gold: #c9a84c;
+        --gold-light: #e8c97a;
+        --gold-dim: #7a5e28;
+        --dark: #0a0804;
+        --dark2: #13100a;
+        --dark3: #1e1a12;
+        --text: #e8d8b0;
+        --text-dim: #8a7550;
+        --radius: 6px;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--dark);
+        color: var(--text);
+        font-family: 'Crimson Pro', serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden;
+      }
+
+      /* ─── Header ─── */
+      header {
+        width: 100%;
+        padding: 28px 24px 16px;
+        text-align: center;
+        position: relative;
+        z-index: 10;
+      }
+
+      .eyebrow {
+        font-family: 'Cinzel', serif;
+        font-size: 10px;
+        letter-spacing: 0.35em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        opacity: 0.8;
+      }
+
+      h1 {
+        font-family: 'Cinzel', serif;
+        font-size: clamp(1.6rem, 5vw, 2.8rem);
+        font-weight: 900;
+        color: var(--gold-light);
+        line-height: 1.1;
+        letter-spacing: 0.04em;
+        text-shadow: 0 0 40px rgba(201,168,76,0.4);
+        margin-bottom: 12px;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+        color: var(--text-dim);
+        font-style: italic;
+        letter-spacing: 0.02em;
+        max-width: 420px;
+        margin: 0 auto;
+        line-height: 1.55;
+      }
+
+      .divider {
+        width: 120px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+        margin: 18px auto 0;
+      }
+
+      /* ─── Controls Panel ─── */
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        padding: 16px 20px;
+        width: 100%;
+        max-width: 600px;
+        z-index: 10;
+      }
+
+      .ctrl-btn {
+        font-family: 'Cinzel', serif;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 9px 18px;
+        border: 1px solid var(--gold-dim);
+        background: rgba(201,168,76,0.07);
+        color: var(--gold);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      .ctrl-btn:hover {
+        background: rgba(201,168,76,0.18);
+        border-color: var(--gold);
+        color: var(--gold-light);
+        box-shadow: 0 0 16px rgba(201,168,76,0.2);
+      }
+      .ctrl-btn.active {
+        background: rgba(201,168,76,0.25);
+        border-color: var(--gold-light);
+        color: var(--gold-light);
+        box-shadow: 0 0 20px rgba(201,168,76,0.3);
+      }
+
+      /* Background swatches */
+      .bg-swatches {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .bg-label {
+        font-family: 'Cinzel', serif;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+      }
+      .swatch {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform 0.15s, border-color 0.15s;
+      }
+      .swatch:hover { transform: scale(1.15); }
+      .swatch.selected { border-color: var(--gold-light); transform: scale(1.2); }
+
+      /* ─── Model Viewer Container ─── */
+      .viewer-wrap {
+        width: 100%;
+        max-width: 600px;
+        padding: 0 16px 20px;
+        flex: 1;
+      }
+
+      model-viewer {
+        width: 100%;
+        height: 460px;
+        border: 1px solid var(--gold-dim);
+        border-radius: 10px;
+        background: var(--dark2);
+        box-shadow: 0 0 60px rgba(201,168,76,0.08), inset 0 0 40px rgba(0,0,0,0.5);
+        transition: background 0.5s ease;
+        --poster-color: transparent;
+        --progress-bar-color: var(--gold);
+      }
+
+      /* ─── Hotspot ─── */
+      .Hotspot {
+        background: rgba(10,8,4,0.85);
+        border: 1px solid var(--gold-dim);
+        border-radius: 4px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-family: 'Crimson Pro', serif;
+        font-size: 13px;
+        color: var(--gold);
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .Hotspot:hover {
+        background: rgba(201,168,76,0.15);
+        border-color: var(--gold);
+      }
+
+      /* ─── Progress Bar ─── */
+      .progress-bar {
+        display: block;
+        width: 100%;
+        height: 3px;
+        background: rgba(201,168,76,0.15);
+        position: relative;
+        overflow: hidden;
+      }
+      .progress-bar.hide { display: none; }
+      .update-bar {
+        background: linear-gradient(90deg, var(--gold-dim), var(--gold-light));
+        height: 100%;
+        width: 0%;
+        transition: width 0.1s;
+      }
+
+      /* ─── AR Button ─── */
+      #ar-button {
+        font-family: 'Cinzel', serif;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 13px 28px;
+        background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+        border: 1px solid var(--gold);
+        color: var(--gold-light);
+        border-radius: var(--radius);
+        cursor: pointer;
+        position: absolute;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 24px rgba(201,168,76,0.15);
+      }
+      #ar-button:hover {
+        background: linear-gradient(135deg, rgba(201,168,76,0.35), rgba(201,168,76,0.15));
+        box-shadow: 0 6px 32px rgba(201,168,76,0.35);
+        transform: translateX(-50%) translateY(-2px);
+      }
+      #ar-button:not([slot]) { display: none; }
+
+      /* ─── AR Prompt ─── */
+      #ar-prompt {
+        position: absolute;
+        left: 50%;
+        bottom: 90px;
+        transform: translateX(-50%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s;
+      }
+      #ar-prompt img { width: 60px; filter: drop-shadow(0 0 12px var(--gold)); }
+      model-viewer[ar-status="session-started"] #ar-prompt { opacity: 1; }
+
+      /* ─── Instructions ─── */
+      .instructions {
+        max-width: 560px;
+        width: 100%;
+        padding: 0 20px 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+      }
+      .inst-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(201,168,76,0.12);
+        border-radius: 8px;
+        padding: 14px 14px;
+        text-align: center;
+      }
+      .inst-icon { font-size: 22px; margin-bottom: 6px; }
+      .inst-title {
+        font-family: 'Cinzel', serif;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .inst-desc {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.45;
+      }
+
+      /* ─── Footer ─── */
+      footer {
+        font-size: 11px;
+        color: var(--text-dim);
+        letter-spacing: 0.05em;
+        padding: 16px 20px 24px;
+        opacity: 0.5;
+      }
+
+      /* Background theme classes applied to model-viewer */
+      model-viewer.bg-dark   { background: #0a0804; }
+      model-viewer.bg-stone  { background: radial-gradient(ellipse at center, #2a2318 0%, #110e08 100%); }
+      model-viewer.bg-sky    { background: radial-gradient(ellipse at top, #1a2a3a 0%, #0a1520 100%); }
+      model-viewer.bg-ember  { background: radial-gradient(ellipse at bottom, #2a1208 0%, #100804 100%); }
+      model-viewer.bg-mist   { background: radial-gradient(ellipse at center, #1e1e20 0%, #0c0c10 100%); }
+    </style>
   </head>
   <body>
-    <!-- <model-viewer> HTML element -->
-    <model-viewer src="mongolian_warrior.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="2" exposure="0.3" shadow-softness="1" camera-orbit="-341.7deg 89deg 183.8m" field-of-view="30deg">
-      <button class="Hotspot" slot="hotspot-1" data-position="-1.0596554162933387m 50.021833434753646m 0.10686924708364742m" data-normal="-0.15125958185098864m -0.07745623796356356m 0.9854547529434295m" data-visibility-attribute="visible">
+
+    <!-- ── Header ── -->
+    <header>
+      <p class="eyebrow">WebAR Lab · Монгол дайчин</p>
+      <h1>Mongolian Warrior</h1>
+      <p class="subtitle">Монгол эрийн эр зориг — гурван хэмжээст орон зайд амилсан. Загварыг эргүүлж, ойртуулж, AR-аар өөрийн орчинд харна уу.</p>
+      <div class="divider"></div>
+    </header>
+
+    <!-- ── Controls ── -->
+    <div class="controls">
+      <!-- Auto-rotate toggle -->
+      <button class="ctrl-btn" id="rotate-btn" onclick="toggleRotate()">⟳ Авто эргэлт: OFF</button>
+
+      <!-- Background swatches -->
+      <div class="bg-swatches">
+        <span class="bg-label">Арын дэвсгэр:</span>
+        <span class="swatch selected" style="background:#0a0804;" title="Харанхуй" onclick="setBg('bg-dark', this)"></span>
+        <span class="swatch" style="background:#2a2318;" title="Чулуу" onclick="setBg('bg-stone', this)"></span>
+        <span class="swatch" style="background:#1a2a3a;" title="Тэнгэр" onclick="setBg('bg-sky', this)"></span>
+        <span class="swatch" style="background:#2a1208;" title="Хар дөл" onclick="setBg('bg-ember', this)"></span>
+        <span class="swatch" style="background:#1e1e20;" title="Манан" onclick="setBg('bg-mist', this)"></span>
+      </div>
+    </div>
+
+    <!-- ── Model Viewer ── -->
+    <div class="viewer-wrap">
+      <model-viewer
+          id="mv"
+          src="mongolian_warrior.glb"
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          tone-mapping="neutral"
+          poster="poster.webp"
+          shadow-intensity="2"
+          exposure="0.5"
+          shadow-softness="1"
+          camera-orbit="-341.7deg 89deg auto"
+          field-of-view="30deg"
+          class="bg-dark">
+
+        <button class="Hotspot" slot="hotspot-1"
+          data-position="-1.05m 50.02m 0.10m"
+          data-normal="-0.15m -0.07m 0.98m"
+          data-visibility-attribute="visible">
           <div class="HotspotAnnotation">Mongolian Warrior</div>
-      </button><button class="Hotspot" slot="hotspot-2" data-position="5.0496553344455535m 8.9860200881958m -7.034318694138591m" data-normal="0m 1m 2.220446049250313e-16m" data-visibility-attribute="visible"></button>
-      <div class="progress-bar hide" slot="progress-bar">
+        </button>
+
+        <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
+        </div>
+
+        <button slot="ar-button" id="ar-button">
+          ✦ AR-аар харах
+        </button>
+
+        <div id="ar-prompt">
+          <img src="https://modelviewer.dev/shared/ar_hand_prompt.png" alt="AR prompt">
+        </div>
+      </model-viewer>
+    </div>
+
+    <!-- ── Instructions ── -->
+    <div class="instructions">
+      <div class="inst-card">
+        <div class="inst-icon">👆</div>
+        <div class="inst-title">Эргүүлэх</div>
+        <div class="inst-desc">Нэг хуруугаар чирж загварыг эргүүлнэ үү</div>
       </div>
-      <button slot="ar-button" id="ar-button">
-          View in your space
-      </button>
-      <div id="ar-prompt">
-          <img src="ar_hand_prompt.png">
+      <div class="inst-card">
+        <div class="inst-icon">🤏</div>
+        <div class="inst-title">Томруулах</div>
+        <div class="inst-desc">Хоёр хуруугаар дэлгэж / шахаж томруулна</div>
       </div>
-    </model-viewer>  
-    <script src="script.js"></script>
-    <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/{{MODELVIEWER_VERSION}}/model-viewer.min.js"></script>
+      <div class="inst-card">
+        <div class="inst-icon">📱</div>
+        <div class="inst-title">AR харах</div>
+        <div class="inst-desc">"AR-аар харах" товч дарж өрөөндөө байрлуулна</div>
+      </div>
+    </div>
+
+    <footer>© 2025 WebAR Lab — Монгол дайчин 3D загвар</footer>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <script>
+      const mv = document.getElementById('mv');
+      const rotateBtn = document.getElementById('rotate-btn');
+      let rotating = false;
+
+      /* ── Progress bar ── */
+      const onProgress = (event) => {
+        const progressBar = event.target.querySelector('.progress-bar');
+        const updatingBar = event.target.querySelector('.update-bar');
+        updatingBar.style.width = `${event.detail.totalProgress * 100}%`;
+        if (event.detail.totalProgress === 1) {
+          progressBar.classList.add('hide');
+          event.target.removeEventListener('progress', onProgress);
+        } else {
+          progressBar.classList.remove('hide');
+        }
+      };
+      mv.addEventListener('progress', onProgress);
+
+      /* ── Material override on load ── */
+      mv.addEventListener('load', () => {
+        const materials = mv.model.materials;
+        materials.forEach((material) => {
+          material.pbrMetallicRoughness.setMetallicFactor(0.6);
+          material.pbrMetallicRoughness.setRoughnessFactor(0.3);
+        });
+        console.log('Дайчны хуяг металл болж өөрчлөгдлөө!');
+      });
+
+      /* ── Auto-rotate toggle ── */
+      function toggleRotate() {
+        rotating = !rotating;
+        mv.autoRotate = rotating;
+        rotateBtn.textContent = rotating ? '⟳ Авто эргэлт: ON' : '⟳ Авто эргэлт: OFF';
+        rotateBtn.classList.toggle('active', rotating);
+      }
+
+      /* ── Background switcher ── */
+      const bgClasses = ['bg-dark','bg-stone','bg-sky','bg-ember','bg-mist'];
+      function setBg(cls, el) {
+        bgClasses.forEach(c => mv.classList.remove(c));
+        mv.classList.add(cls);
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+      }
+    </script>
   </body>
 </html>
