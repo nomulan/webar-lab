@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
+      /* ─── CSS Variables ─── */
       :root {
         --gold: #c9a84c;
         --gold-light: #e8c97a;
@@ -18,7 +19,6 @@
         --text: #e8d8b0;
         --text-dim: #8a7550;
         --radius: 6px;
-        --glow: 0 0 30px rgba(201,168,76,0.25);
       }
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,17 +34,7 @@
         overflow-x: hidden;
       }
 
-      /* ── Particle Canvas ── */
-      #particle-canvas {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.35;
-      }
-
-      /* ── Header ── */
+      /* ─── Header ─── */
       header {
         width: 100%;
         padding: 28px 24px 16px;
@@ -52,6 +42,7 @@
         position: relative;
         z-index: 10;
       }
+
       .eyebrow {
         font-family: 'Cinzel', serif;
         font-size: 10px;
@@ -61,6 +52,7 @@
         margin-bottom: 10px;
         opacity: 0.8;
       }
+
       h1 {
         font-family: 'Cinzel', serif;
         font-size: clamp(1.6rem, 5vw, 2.8rem);
@@ -71,6 +63,7 @@
         text-shadow: 0 0 40px rgba(201,168,76,0.4);
         margin-bottom: 12px;
       }
+
       .subtitle {
         font-size: 1rem;
         color: var(--text-dim);
@@ -80,6 +73,7 @@
         margin: 0 auto;
         line-height: 1.55;
       }
+
       .divider {
         width: 120px;
         height: 1px;
@@ -87,63 +81,62 @@
         margin: 18px auto 0;
       }
 
-      /* ── Live Stats Bar ── */
+      /* ─── Stats Bar ─── */
       .stats-bar {
-        display: flex;
-        gap: 0;
         width: 100%;
         max-width: 600px;
-        margin: 0 16px 12px;
-        border: 1px solid rgba(201,168,76,0.2);
+        padding: 0 16px 10px;
+        z-index: 10;
+      }
+      .stats-inner {
+        display: flex;
+        width: 100%;
+        border: 1px solid rgba(201,168,76,0.18);
         border-radius: 8px;
         overflow: hidden;
-        z-index: 10;
-        position: relative;
-      }
-      .stat-item {
-        flex: 1;
-        padding: 10px 8px;
-        text-align: center;
-        border-right: 1px solid rgba(201,168,76,0.12);
         background: rgba(201,168,76,0.03);
-        transition: background 0.3s;
       }
-      .stat-item:last-child { border-right: none; }
-      .stat-item:hover { background: rgba(201,168,76,0.07); }
-      .stat-val {
+      .stat-cell {
+        flex: 1;
+        padding: 9px 6px;
+        text-align: center;
+        border-right: 1px solid rgba(201,168,76,0.1);
+      }
+      .stat-cell:last-child { border-right: none; }
+      .stat-num {
+        display: block;
         font-family: 'Cinzel', serif;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 700;
         color: var(--gold-light);
-        display: block;
         line-height: 1;
         margin-bottom: 3px;
-        transition: color 0.3s;
       }
-      .stat-val.pulse { animation: statPulse 0.4s ease; }
-      @keyframes statPulse {
+      .stat-num.flash { animation: flashNum 0.4s ease; }
+      @keyframes flashNum {
         0%,100% { color: var(--gold-light); }
-        50% { color: #fff; text-shadow: 0 0 20px var(--gold); }
+        40%     { color: #fff; text-shadow: 0 0 14px var(--gold); }
       }
-      .stat-label {
-        font-size: 9px;
+      .stat-lbl {
         font-family: 'Cinzel', serif;
-        letter-spacing: 0.12em;
+        font-size: 8.5px;
+        letter-spacing: 0.1em;
         color: var(--text-dim);
         text-transform: uppercase;
       }
 
-      /* ── Controls Panel ── */
+      /* ─── Controls Panel ─── */
       .controls {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
-        padding: 8px 20px 12px;
+        padding: 6px 20px 14px;
         width: 100%;
         max-width: 600px;
         z-index: 10;
       }
+
       .ctrl-btn {
         font-family: 'Cinzel', serif;
         font-size: 11px;
@@ -162,18 +155,17 @@
       }
       .ctrl-btn::after {
         content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(201,168,76,0.12), transparent);
         transform: translateX(-100%);
-        transition: transform 0.4s;
+        transition: transform 0.45s ease;
       }
       .ctrl-btn:hover::after { transform: translateX(100%); }
       .ctrl-btn:hover {
         background: rgba(201,168,76,0.18);
         border-color: var(--gold);
         color: var(--gold-light);
-        box-shadow: var(--glow);
+        box-shadow: 0 0 16px rgba(201,168,76,0.2);
       }
       .ctrl-btn.active {
         background: rgba(201,168,76,0.25);
@@ -183,11 +175,7 @@
       }
 
       /* Background swatches */
-      .bg-swatches {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
+      .bg-swatches { display: flex; gap: 8px; align-items: center; }
       .bg-label {
         font-family: 'Cinzel', serif;
         font-size: 10px;
@@ -196,25 +184,25 @@
         text-transform: uppercase;
       }
       .swatch {
-        width: 26px;
-        height: 26px;
+        width: 26px; height: 26px;
         border-radius: 50%;
         border: 2px solid transparent;
         cursor: pointer;
         transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
       }
       .swatch:hover { transform: scale(1.15); }
-      .swatch.selected { border-color: var(--gold-light); transform: scale(1.2); box-shadow: 0 0 10px rgba(201,168,76,0.4); }
+      .swatch.selected { border-color: var(--gold-light); transform: scale(1.2); box-shadow: 0 0 10px rgba(201,168,76,0.35); }
 
-      /* ── Model Viewer ── */
+      /* ─── Model Viewer Container ─── */
       .viewer-wrap {
         width: 100%;
         max-width: 600px;
-        padding: 0 16px 10px;
+        padding: 0 16px 12px;
         flex: 1;
-        z-index: 10;
         position: relative;
+        z-index: 10;
       }
+
       model-viewer {
         width: 100%;
         height: 460px;
@@ -222,16 +210,12 @@
         border-radius: 10px;
         background: var(--dark2);
         box-shadow: 0 0 60px rgba(201,168,76,0.08), inset 0 0 40px rgba(0,0,0,0.5);
-        transition: background 0.5s ease, box-shadow 0.5s ease;
+        transition: background 0.5s ease;
         --poster-color: transparent;
         --progress-bar-color: var(--gold);
       }
-      model-viewer.active-tracking {
-        box-shadow: 0 0 80px rgba(201,168,76,0.3), inset 0 0 40px rgba(0,0,0,0.5);
-        border-color: var(--gold);
-      }
 
-      /* ── Hotspot ── */
+      /* ─── Hotspot ─── */
       .Hotspot {
         background: rgba(10,8,4,0.85);
         border: 1px solid var(--gold-dim);
@@ -245,29 +229,23 @@
         white-space: nowrap;
         transition: all 0.2s;
       }
-      .Hotspot:hover {
-        background: rgba(201,168,76,0.15);
-        border-color: var(--gold);
-      }
+      .Hotspot:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
 
-      /* ── Progress Bar ── */
+      /* ─── Progress Bar ─── */
       .progress-bar {
         display: block;
-        width: 100%;
-        height: 3px;
+        width: 100%; height: 3px;
         background: rgba(201,168,76,0.15);
-        position: relative;
-        overflow: hidden;
+        position: relative; overflow: hidden;
       }
       .progress-bar.hide { display: none; }
       .update-bar {
         background: linear-gradient(90deg, var(--gold-dim), var(--gold-light));
-        height: 100%;
-        width: 0%;
+        height: 100%; width: 0%;
         transition: width 0.1s;
       }
 
-      /* ── AR Button ── */
+      /* ─── AR Button ─── */
       #ar-button {
         font-family: 'Cinzel', serif;
         font-size: 12px;
@@ -280,8 +258,7 @@
         border-radius: var(--radius);
         cursor: pointer;
         position: absolute;
-        bottom: 18px;
-        left: 50%;
+        bottom: 18px; left: 50%;
         transform: translateX(-50%);
         white-space: nowrap;
         transition: all 0.25s ease;
@@ -294,322 +271,227 @@
       }
       #ar-button:not([slot]) { display: none; }
 
-      /* ── AR Prompt ── */
+      /* ─── AR Prompt ─── */
       #ar-prompt {
-        position: absolute;
-        left: 50%;
-        bottom: 90px;
+        position: absolute; left: 50%; bottom: 90px;
         transform: translateX(-50%);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.4s;
+        opacity: 0; pointer-events: none; transition: opacity 0.4s;
       }
       #ar-prompt img { width: 60px; filter: drop-shadow(0 0 12px var(--gold)); }
       model-viewer[ar-status="session-started"] #ar-prompt { opacity: 1; }
 
-      /* ── Interaction Log ── */
-      .log-panel {
-        width: 100%;
-        max-width: 600px;
-        padding: 0 16px 12px;
+      /* ─── Camera Angle Strip ─── */
+      .cam-strip {
+        width: 100%; max-width: 600px;
+        padding: 0 16px 10px;
+        display: flex; gap: 8px;
         z-index: 10;
       }
-      .log-header {
-        font-family: 'Cinzel', serif;
-        font-size: 10px;
-        letter-spacing: 0.2em;
-        color: var(--text-dim);
-        text-transform: uppercase;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .log-dot {
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: var(--gold);
-        animation: blink 1.5s infinite;
-      }
-      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-      .log-list {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        max-height: 110px;
-        overflow-y: auto;
-      }
-      .log-list::-webkit-scrollbar { width: 3px; }
-      .log-list::-webkit-scrollbar-track { background: transparent; }
-      .log-list::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
-      .log-entry {
-        font-size: 12px;
-        color: var(--text-dim);
-        padding: 4px 8px;
-        border-left: 2px solid rgba(201,168,76,0.2);
-        background: rgba(255,255,255,0.015);
-        border-radius: 0 4px 4px 0;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        animation: fadeIn 0.3s ease;
-        transition: opacity 0.5s;
-      }
-      .log-entry.new { border-left-color: var(--gold); color: var(--text); }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-      .log-time {
-        font-family: 'Cinzel', serif;
-        font-size: 10px;
-        color: var(--gold-dim);
-        white-space: nowrap;
-        min-width: 44px;
-      }
-
-      /* ── Camera Angle Display ── */
-      .angle-display {
-        width: 100%;
-        max-width: 600px;
-        padding: 0 16px 12px;
-        z-index: 10;
-      }
-      .angle-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px;
-      }
-      .angle-card {
+      .cam-cell {
+        flex: 1;
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(201,168,76,0.1);
         border-radius: 6px;
-        padding: 10px 12px;
+        padding: 8px 10px;
         text-align: center;
       }
-      .angle-val {
-        font-family: 'Cinzel', serif;
-        font-size: 1rem;
-        color: var(--gold);
+      .cam-val {
         display: block;
-        margin-bottom: 2px;
-        transition: color 0.2s;
-      }
-      .angle-lab {
-        font-size: 10px;
         font-family: 'Cinzel', serif;
-        letter-spacing: 0.1em;
-        color: var(--text-dim);
-        text-transform: uppercase;
+        font-size: 0.9rem;
+        color: var(--gold);
+        line-height: 1; margin-bottom: 3px;
       }
-
-      /* ── Screenshot Toast ── */
-      #toast {
-        position: fixed;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%) translateY(20px);
-        background: rgba(10,8,4,0.95);
-        border: 1px solid var(--gold);
-        border-radius: 8px;
-        padding: 12px 22px;
+      .cam-lbl {
         font-family: 'Cinzel', serif;
-        font-size: 12px;
-        letter-spacing: 0.1em;
-        color: var(--gold-light);
-        z-index: 9999;
-        opacity: 0;
-        transition: all 0.3s ease;
-        pointer-events: none;
-        box-shadow: var(--glow);
-        white-space: nowrap;
-      }
-      #toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        font-size: 8px; letter-spacing: 0.12em;
+        color: var(--text-dim); text-transform: uppercase;
       }
 
-      /* ── Spotlight ── */
-      #spotlight {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        border-radius: 10px;
-        pointer-events: none;
-        z-index: 1;
-        background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.25) 100%);
-        transition: background 0.1s;
+      /* ─── Interaction Log ─── */
+      .log-wrap {
+        width: 100%; max-width: 600px;
+        padding: 0 16px 14px;
+        z-index: 10;
+      }
+      .log-head {
+        display: flex; align-items: center;
+        gap: 7px; margin-bottom: 7px;
+      }
+      .log-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%; background: var(--gold);
+        animation: blink 1.6s ease-in-out infinite; flex-shrink: 0;
+      }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+      .log-title {
+        font-family: 'Cinzel', serif;
+        font-size: 9px; letter-spacing: 0.2em;
+        color: var(--text-dim); text-transform: uppercase;
+      }
+      .log-scroll {
+        max-height: 108px; overflow-y: auto;
+        display: flex; flex-direction: column; gap: 3px;
+      }
+      .log-scroll::-webkit-scrollbar { width: 2px; }
+      .log-scroll::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+      .log-row {
+        display: flex; gap: 10px; align-items: baseline;
+        padding: 4px 8px;
+        border-left: 2px solid rgba(201,168,76,0.15);
+        border-radius: 0 3px 3px 0;
+        background: rgba(255,255,255,0.015);
+        font-size: 12px; color: var(--text-dim);
+        animation: slideIn 0.25s ease;
+      }
+      .log-row.fresh { border-left-color: var(--gold); color: var(--text); }
+      @keyframes slideIn {
+        from { opacity:0; transform: translateY(-4px); }
+        to   { opacity:1; transform: none; }
+      }
+      .log-ts {
+        font-family: 'Cinzel', serif;
+        font-size: 9.5px; color: var(--gold-dim);
+        white-space: nowrap; min-width: 40px;
       }
 
-      /* ── Screenshot Preview ── */
-      #screenshot-preview {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.85);
-        z-index: 9998;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 16px;
-      }
-      #screenshot-preview.show { display: flex; }
-      #screenshot-preview img { max-width: 80vw; max-height: 60vh; border: 1px solid var(--gold); border-radius: 8px; }
-      .preview-btns { display: flex; gap: 12px; }
-
-      /* ── Instructions ── */
+      /* ─── Instructions ─── */
       .instructions {
-        max-width: 560px;
-        width: 100%;
-        padding: 0 20px 20px;
+        max-width: 560px; width: 100%;
+        padding: 0 20px 30px;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 10px;
-        z-index: 10;
+        gap: 12px; z-index: 10;
       }
       .inst-card {
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(201,168,76,0.12);
-        border-radius: 8px;
-        padding: 14px;
-        text-align: center;
-        transition: border-color 0.3s, background 0.3s;
+        border-radius: 8px; padding: 14px; text-align: center;
+        transition: border-color 0.25s, background 0.25s;
       }
       .inst-card:hover {
         background: rgba(201,168,76,0.04);
-        border-color: rgba(201,168,76,0.25);
+        border-color: rgba(201,168,76,0.28);
       }
       .inst-icon { font-size: 22px; margin-bottom: 6px; }
       .inst-title {
-        font-family: 'Cinzel', serif;
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        color: var(--gold);
-        text-transform: uppercase;
-        margin-bottom: 4px;
+        font-family: 'Cinzel', serif; font-size: 10px;
+        letter-spacing: 0.1em; color: var(--gold);
+        text-transform: uppercase; margin-bottom: 4px;
       }
       .inst-desc { font-size: 12px; color: var(--text-dim); line-height: 1.45; }
 
-      /* ── Footer ── */
+      /* ─── Footer ─── */
       footer {
-        font-size: 11px;
-        color: var(--text-dim);
-        letter-spacing: 0.05em;
-        padding: 16px 20px 24px;
-        opacity: 0.5;
-        z-index: 10;
+        font-size: 11px; color: var(--text-dim);
+        letter-spacing: 0.05em; padding: 16px 20px 24px; opacity: 0.5;
       }
 
-      /* Background themes */
-      model-viewer.bg-dark   { background: #0a0804; }
-      model-viewer.bg-stone  { background: radial-gradient(ellipse at center, #2a2318 0%, #110e08 100%); }
-      model-viewer.bg-sky    { background: radial-gradient(ellipse at top, #1a2a3a 0%, #0a1520 100%); }
-      model-viewer.bg-ember  { background: radial-gradient(ellipse at bottom, #2a1208 0%, #100804 100%); }
-      model-viewer.bg-mist   { background: radial-gradient(ellipse at center, #1e1e20 0%, #0c0c10 100%); }
+      /* Background theme classes */
+      model-viewer.bg-dark  { background: #0a0804; }
+      model-viewer.bg-stone { background: radial-gradient(ellipse at center, #2a2318 0%, #110e08 100%); }
+      model-viewer.bg-sky   { background: radial-gradient(ellipse at top, #1a2a3a 0%, #0a1520 100%); }
+      model-viewer.bg-ember { background: radial-gradient(ellipse at bottom, #2a1208 0%, #100804 100%); }
+      model-viewer.bg-mist  { background: radial-gradient(ellipse at center, #1e1e20 0%, #0c0c10 100%); }
 
-      /* ── Tooltip ── */
-      .tooltip-wrap { position: relative; display: inline-block; }
-      .tooltip-wrap .tip {
-        visibility: hidden; opacity: 0;
-        position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
-        background: rgba(10,8,4,0.95);
-        border: 1px solid var(--gold-dim);
-        color: var(--text);
-        font-family: 'Crimson Pro', serif;
-        font-size: 12px;
-        padding: 6px 10px;
-        border-radius: 4px;
+      /* ─── Camera Flash ─── */
+      #flash {
+        position: fixed; inset: 0;
+        background: #fff; opacity: 0;
+        pointer-events: none; z-index: 9000;
+        transition: opacity 0.05s;
+      }
+      #flash.on { opacity: 0.6; }
+
+      /* ─── Screenshot Modal ─── */
+      #shot-modal {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.88); z-index: 9100;
+        align-items: center; justify-content: center;
+        flex-direction: column; gap: 18px;
+        backdrop-filter: blur(5px);
+      }
+      #shot-modal.open { display: flex; }
+      #shot-img {
+        max-width: min(80vw, 520px); max-height: 55vh;
+        border: 1px solid var(--gold); border-radius: 8px;
+        box-shadow: 0 0 60px rgba(201,168,76,0.25);
+      }
+      .shot-label {
+        font-family: 'Cinzel', serif; font-size: 11px;
+        letter-spacing: 0.18em; color: var(--text-dim);
+        text-transform: uppercase;
+      }
+      .shot-btns { display: flex; gap: 12px; }
+
+      /* ─── Toast ─── */
+      #toast {
+        position: fixed; bottom: 36px; left: 50%;
+        transform: translateX(-50%) translateY(12px);
+        background: rgba(10,8,4,0.96);
+        border: 1px solid var(--gold-dim); border-radius: 6px;
+        padding: 11px 22px;
+        font-family: 'Cinzel', serif; font-size: 11px;
+        letter-spacing: 0.1em; color: var(--gold-light);
+        opacity: 0; pointer-events: none; z-index: 9200;
+        transition: opacity 0.25s, transform 0.25s;
         white-space: nowrap;
-        transition: opacity 0.2s;
-        z-index: 100;
-        pointer-events: none;
       }
-      .tooltip-wrap:hover .tip { visibility: visible; opacity: 1; }
-
-      /* ── Heatmap Overlay ── */
-      #heatmap-canvas {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        border-radius: 10px;
-        pointer-events: none;
-        z-index: 2;
-        opacity: 0;
-        transition: opacity 0.5s;
+      #toast.show {
+        opacity: 1; transform: translateX(-50%) translateY(0);
+        box-shadow: 0 0 28px rgba(201,168,76,0.22);
       }
-      #heatmap-canvas.show { opacity: 0.6; }
     </style>
   </head>
   <body>
 
-    <canvas id="particle-canvas"></canvas>
-
     <!-- ── Header ── -->
     <header>
-      <p class="eyebrow">WebAR Lab · Монгол дайчин · Live Session</p>
+      <p class="eyebrow">WebAR Lab · Монгол дайчин · Live Tracking</p>
       <h1>Mongolian Warrior</h1>
       <p class="subtitle">Монгол эрийн эр зориг — гурван хэмжээст орон зайд амилсан. Загварыг эргүүлж, ойртуулж, AR-аар өөрийн орчинд харна уу.</p>
       <div class="divider"></div>
     </header>
 
-    <!-- ── Live Stats ── -->
-    <div class="stats-bar" id="stats-bar">
-      <div class="stat-item">
-        <span class="stat-val" id="stat-time">0:00</span>
-        <span class="stat-label">Session</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-val" id="stat-rotations">0</span>
-        <span class="stat-label">Rotations</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-val" id="stat-zooms">0</span>
-        <span class="stat-label">Zooms</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-val" id="stat-interactions">0</span>
-        <span class="stat-label">Interactions</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-val" id="stat-fps">—</span>
-        <span class="stat-label">FPS</span>
+    <!-- ── Live Stats Bar ── -->
+    <div class="stats-bar">
+      <div class="stats-inner">
+        <div class="stat-cell">
+          <span class="stat-num" id="s-time">0:00</span>
+          <span class="stat-lbl">Session</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num" id="s-rot">0</span>
+          <span class="stat-lbl">Rotations</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num" id="s-zoom">0</span>
+          <span class="stat-lbl">Zooms</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num" id="s-act">0</span>
+          <span class="stat-lbl">Actions</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num" id="s-shots">0</span>
+          <span class="stat-lbl">Captures</span>
+        </div>
       </div>
     </div>
 
-    <!-- ── Controls Panel ── -->
+    <!-- ── Controls ── -->
     <div class="controls">
       <button class="ctrl-btn" id="rotate-btn" onclick="toggleRotate()">⟳ Авто эргэлт: OFF</button>
+      <button class="ctrl-btn" id="shot-btn"   onclick="takeScreenshot()">📷 Capture</button>
+      <button class="ctrl-btn"                  onclick="resetCam()">⌖ Reset View</button>
 
-      <div class="tooltip-wrap">
-        <button class="ctrl-btn" id="explode-btn" onclick="toggleExplode()">⚡ Explode View</button>
-        <span class="tip">Expand model parts apart</span>
-      </div>
-
-      <div class="tooltip-wrap">
-        <button class="ctrl-btn" id="wireframe-btn" onclick="toggleWireframe()">⬡ Wireframe</button>
-        <span class="tip">Show mesh wireframe overlay</span>
-      </div>
-
-      <div class="tooltip-wrap">
-        <button class="ctrl-btn" id="heatmap-btn" onclick="toggleHeatmap()">🔥 Interaction Map</button>
-        <span class="tip">Show where you've been looking</span>
-      </div>
-
-      <div class="tooltip-wrap">
-        <button class="ctrl-btn" id="screenshot-btn" onclick="takeScreenshot()">📷 Capture</button>
-        <span class="tip">Save current view as image</span>
-      </div>
-
-      <div class="tooltip-wrap">
-        <button class="ctrl-btn" id="reset-btn" onclick="resetCamera()">⌖ Reset View</button>
-        <span class="tip">Return to default camera</span>
-      </div>
-
-      <!-- Background swatches -->
       <div class="bg-swatches">
-        <span class="bg-label">BG:</span>
-        <span class="swatch selected" style="background:#0a0804;" title="Харанхуй" onclick="setBg('bg-dark', this)"></span>
-        <span class="swatch" style="background:#2a2318;" title="Чулуу" onclick="setBg('bg-stone', this)"></span>
-        <span class="swatch" style="background:#1a2a3a;" title="Тэнгэр" onclick="setBg('bg-sky', this)"></span>
-        <span class="swatch" style="background:#2a1208;" title="Хар дөл" onclick="setBg('bg-ember', this)"></span>
-        <span class="swatch" style="background:#1e1e20;" title="Манан" onclick="setBg('bg-mist', this)"></span>
+        <span class="bg-label">Арын дэвсгэр:</span>
+        <span class="swatch selected" style="background:#0a0804;" title="Харанхуй" onclick="setBg('bg-dark',this)"></span>
+        <span class="swatch" style="background:#2a2318;" title="Чулуу"   onclick="setBg('bg-stone',this)"></span>
+        <span class="swatch" style="background:#1a2a3a;" title="Тэнгэр"  onclick="setBg('bg-sky',this)"></span>
+        <span class="swatch" style="background:#2a1208;" title="Хар дөл" onclick="setBg('bg-ember',this)"></span>
+        <span class="swatch" style="background:#1e1e20;" title="Манан"   onclick="setBg('bg-mist',this)"></span>
       </div>
     </div>
 
@@ -646,39 +528,36 @@
         <div id="ar-prompt">
           <img src="https://modelviewer.dev/shared/ar_hand_prompt.png" alt="AR prompt">
         </div>
-
-        <canvas id="heatmap-canvas"></canvas>
-        <div id="spotlight"></div>
       </model-viewer>
     </div>
 
-    <!-- ── Camera Angle Display ── -->
-    <div class="angle-display">
-      <div class="angle-grid">
-        <div class="angle-card">
-          <span class="angle-val" id="cam-theta">—°</span>
-          <span class="angle-lab">Azimuth</span>
-        </div>
-        <div class="angle-card">
-          <span class="angle-val" id="cam-phi">—°</span>
-          <span class="angle-lab">Elevation</span>
-        </div>
-        <div class="angle-card">
-          <span class="angle-val" id="cam-radius">—m</span>
-          <span class="angle-lab">Distance</span>
-        </div>
+    <!-- ── Camera Angle Strip ── -->
+    <div class="cam-strip">
+      <div class="cam-cell">
+        <span class="cam-val" id="c-az">—°</span>
+        <span class="cam-lbl">Azimuth</span>
+      </div>
+      <div class="cam-cell">
+        <span class="cam-val" id="c-el">—°</span>
+        <span class="cam-lbl">Elevation</span>
+      </div>
+      <div class="cam-cell">
+        <span class="cam-val" id="c-dist">—</span>
+        <span class="cam-lbl">Distance</span>
+      </div>
+      <div class="cam-cell">
+        <span class="cam-val" id="c-fov">—°</span>
+        <span class="cam-lbl">FOV</span>
       </div>
     </div>
 
     <!-- ── Interaction Log ── -->
-    <div class="log-panel">
-      <div class="log-header">
+    <div class="log-wrap">
+      <div class="log-head">
         <span class="log-dot"></span>
-        Live Interaction Log
+        <span class="log-title">Live Interaction Log</span>
       </div>
-      <div class="log-list" id="log-list">
-        <div class="log-entry"><span class="log-time">00:00</span><span>Session started — model loading…</span></div>
-      </div>
+      <div class="log-scroll" id="log"></div>
     </div>
 
     <!-- ── Instructions ── -->
@@ -699,25 +578,23 @@
         <div class="inst-desc">"AR-аар харах" товч дарж өрөөндөө байрлуулна</div>
       </div>
       <div class="inst-card">
-        <div class="inst-icon">🎯</div>
-        <div class="inst-title">Angle Track</div>
-        <div class="inst-desc">Camera angles update in real-time above</div>
-      </div>
-      <div class="inst-card">
-        <div class="inst-icon">📊</div>
-        <div class="inst-title">Stats</div>
-        <div class="inst-desc">Live session tracking & interaction log</div>
+        <div class="inst-icon">📷</div>
+        <div class="inst-title">Capture</div>
+        <div class="inst-desc">Save the current view as a PNG image</div>
       </div>
     </div>
 
-    <footer>© 2025 WebAR Lab — Монгол дайчин 3D загвар · Session Tracking v2</footer>
+    <footer>© 2025 WebAR Lab — Монгол дайчин 3D загвар · Tracking v2</footer>
 
-    <!-- ── Screenshot Preview Modal ── -->
-    <div id="screenshot-preview">
-      <img id="preview-img" src="" alt="Screenshot">
-      <div class="preview-btns">
-        <button class="ctrl-btn" id="download-btn" onclick="downloadScreenshot()">⬇ Download</button>
-        <button class="ctrl-btn" onclick="closePreview()">✕ Close</button>
+    <!-- ── Overlays ── -->
+    <div id="flash"></div>
+
+    <div id="shot-modal">
+      <span class="shot-label">Captured Frame</span>
+      <img id="shot-img" src="" alt="Screenshot">
+      <div class="shot-btns">
+        <button class="ctrl-btn" onclick="downloadShot()">⬇ Download</button>
+        <button class="ctrl-btn" onclick="closeModal()">✕ Close</button>
       </div>
     </div>
 
@@ -726,398 +603,187 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <script>
-      const mv = document.getElementById('mv');
+      /* ══ REFS ══ */
+      const mv        = document.getElementById('mv');
       const rotateBtn = document.getElementById('rotate-btn');
-      let rotating = false;
+      const logEl     = document.getElementById('log');
+      const flash     = document.getElementById('flash');
+      const shotModal = document.getElementById('shot-modal');
+      const shotImg   = document.getElementById('shot-img');
+      let rotating    = false;
+      let shotDataUrl = null;
 
-      /* ─────────────────────────────────────────
-         SESSION TRACKING
-      ───────────────────────────────────────── */
-      const session = {
-        startTime: Date.now(),
-        rotations: 0,
-        zooms: 0,
-        interactions: 0,
-        lastTheta: null,
-        lastRadius: null,
-        screenshotData: null,
-        heatPoints: [],
-        fpsFrames: [],
-      };
+      /* ══ SESSION STATE ══ */
+      const T0    = Date.now();
+      const state = { rotations:0, zooms:0, actions:0, captures:0,
+                      lastTheta:null, lastRadius:null };
 
-      // FPS tracking
-      let lastFpsTime = performance.now();
-      let frameCount = 0;
-      function trackFPS() {
-        frameCount++;
-        const now = performance.now();
-        if (now - lastFpsTime >= 1000) {
-          const fps = Math.round(frameCount * 1000 / (now - lastFpsTime));
-          document.getElementById('stat-fps').textContent = fps;
-          frameCount = 0;
-          lastFpsTime = now;
-        }
-        requestAnimationFrame(trackFPS);
-      }
-      requestAnimationFrame(trackFPS);
-
-      // Session timer
+      /* Session timer */
       setInterval(() => {
-        const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
-        const m = Math.floor(elapsed / 60);
-        const s = elapsed % 60;
-        document.getElementById('stat-time').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        const s  = Math.floor((Date.now() - T0) / 1000);
+        document.getElementById('s-time').textContent =
+          `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
       }, 1000);
 
-      function pulseStat(id) {
+      function bumpStat(id, key) {
+        state[key]++;
         const el = document.getElementById(id);
-        el.classList.remove('pulse');
+        el.textContent = state[key];
+        el.classList.remove('flash');
         void el.offsetWidth;
-        el.classList.add('pulse');
+        el.classList.add('flash');
       }
 
-      /* ─────────────────────────────────────────
-         CAMERA TRACKING
-      ───────────────────────────────────────── */
-      function getElapsedStr() {
-        const s = Math.floor((Date.now() - session.startTime) / 1000);
+      /* ══ LOG ══ */
+      function ts() {
+        const s = Math.floor((Date.now() - T0) / 1000);
         return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
       }
-
-      function addLog(msg, isNew = true) {
-        const list = document.getElementById('log-list');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry' + (isNew ? ' new' : '');
-        entry.innerHTML = `<span class="log-time">${getElapsedStr()}</span><span>${msg}</span>`;
-        list.insertBefore(entry, list.firstChild);
-        if (list.children.length > 30) list.removeChild(list.lastChild);
-        // Dim old entries after a moment
-        setTimeout(() => entry.classList.remove('new'), 2000);
+      function log(msg) {
+        const row = document.createElement('div');
+        row.className = 'log-row fresh';
+        row.innerHTML = `<span class="log-ts">${ts()}</span><span>${msg}</span>`;
+        logEl.prepend(row);
+        setTimeout(() => row.classList.remove('fresh'), 2000);
+        while (logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
       }
 
-      mv.addEventListener('camera-change', (e) => {
+      /* ══ CAMERA TRACKING ══ */
+      mv.addEventListener('camera-change', () => {
         const orbit = mv.getCameraOrbit();
         if (!orbit) return;
+        const theta  = Math.round(orbit.theta  * 180 / Math.PI);
+        const phi    = Math.round(orbit.phi    * 180 / Math.PI);
+        const radius = parseFloat(orbit.radius.toFixed(2));
+        const fov    = parseFloat(mv.getFieldOfView().toFixed(1));
 
-        const theta = Math.round(orbit.theta * 180 / Math.PI);
-        const phi   = Math.round(orbit.phi   * 180 / Math.PI);
-        const radius = orbit.radius.toFixed(2);
+        document.getElementById('c-az').textContent   = `${theta}°`;
+        document.getElementById('c-el').textContent   = `${phi}°`;
+        document.getElementById('c-dist').textContent = `${radius}m`;
+        document.getElementById('c-fov').textContent  = `${fov}°`;
 
-        document.getElementById('cam-theta').textContent  = `${theta}°`;
-        document.getElementById('cam-phi').textContent    = `${phi}°`;
-        document.getElementById('cam-radius').textContent = `${radius}m`;
-
-        // Detect rotation
-        if (session.lastTheta !== null && Math.abs(theta - session.lastTheta) > 5) {
-          session.rotations++;
-          session.interactions++;
-          document.getElementById('stat-rotations').textContent = session.rotations;
-          document.getElementById('stat-interactions').textContent = session.interactions;
-          pulseStat('stat-rotations');
-          pulseStat('stat-interactions');
-          if (session.rotations % 5 === 0) addLog(`Completed ${session.rotations} rotation events`);
+        if (state.lastTheta !== null && Math.abs(theta - state.lastTheta) > 4) {
+          bumpStat('s-rot', 'rotations');
+          bumpStat('s-act', 'actions');
+          if (state.rotations % 8 === 0) log(`Rotated — ${state.rotations} events`);
         }
-
-        // Detect zoom
-        if (session.lastRadius !== null && Math.abs(parseFloat(radius) - session.lastRadius) > 0.3) {
-          session.zooms++;
-          session.interactions++;
-          document.getElementById('stat-zooms').textContent = session.zooms;
-          document.getElementById('stat-interactions').textContent = session.interactions;
-          pulseStat('stat-zooms');
-          if (session.zooms % 3 === 0) addLog(`Zoomed ${session.zooms} times`);
+        if (state.lastRadius !== null && Math.abs(radius - state.lastRadius) > 0.25) {
+          bumpStat('s-zoom', 'zooms');
+          bumpStat('s-act', 'actions');
+          if (state.zooms % 4 === 0) log(`Zoomed — ${state.zooms} zoom events`);
         }
-
-        session.lastTheta = theta;
-        session.lastRadius = parseFloat(radius);
-
-        // Spotlight follow
-        const normTheta = ((theta % 360) + 360) % 360;
-        const normPhi   = Math.max(0, Math.min(180, phi));
-        const sx = (normTheta / 360) * 100;
-        const sy = (normPhi  / 180) * 100;
-        document.getElementById('spotlight').style.background =
-          `radial-gradient(circle at ${sx}% ${sy}%, transparent 35%, rgba(0,0,0,0.3) 100%)`;
-
-        // Heatmap point
-        recordHeatPoint(sx, sy);
+        state.lastTheta  = theta;
+        state.lastRadius = radius;
       });
 
-      /* ─────────────────────────────────────────
-         HEATMAP
-      ───────────────────────────────────────── */
-      const heatCanvas = document.getElementById('heatmap-canvas');
-      const heatCtx    = heatCanvas.getContext('2d');
-      let heatmapVisible = false;
-
-      function recordHeatPoint(px, py) {
-        session.heatPoints.push({ x: px, y: py });
-        if (session.heatPoints.length > 500) session.heatPoints.shift();
-        if (heatmapVisible) renderHeatmap();
-      }
-
-      function renderHeatmap() {
-        const w = heatCanvas.offsetWidth;
-        const h = heatCanvas.offsetHeight;
-        heatCanvas.width = w;
-        heatCanvas.height = h;
-        heatCtx.clearRect(0, 0, w, h);
-
-        session.heatPoints.forEach((pt, i) => {
-          const alpha = (i / session.heatPoints.length) * 0.8;
-          const r = 20;
-          const x = (pt.x / 100) * w;
-          const y = (pt.y / 100) * h;
-          const grad = heatCtx.createRadialGradient(x, y, 0, x, y, r);
-          grad.addColorStop(0, `rgba(201,168,76,${alpha})`);
-          grad.addColorStop(1, 'rgba(201,168,76,0)');
-          heatCtx.fillStyle = grad;
-          heatCtx.beginPath();
-          heatCtx.arc(x, y, r, 0, Math.PI * 2);
-          heatCtx.fill();
-        });
-      }
-
-      function toggleHeatmap() {
-        heatmapVisible = !heatmapVisible;
-        heatCanvas.classList.toggle('show', heatmapVisible);
-        const btn = document.getElementById('heatmap-btn');
-        btn.classList.toggle('active', heatmapVisible);
-        if (heatmapVisible) {
-          renderHeatmap();
-          addLog('Interaction heatmap enabled');
-          showToast('🔥 Showing interaction heatmap');
-        } else {
-          addLog('Heatmap hidden');
-        }
-      }
-
-      /* ─────────────────────────────────────────
-         PROGRESS BAR
-      ───────────────────────────────────────── */
+      /* ══ PROGRESS BAR ══ */
       const onProgress = (event) => {
-        const progressBar = event.target.querySelector('.progress-bar');
-        const updatingBar = event.target.querySelector('.update-bar');
+        const bar = event.target.querySelector('.progress-bar');
+        const upd = event.target.querySelector('.update-bar');
         const pct = event.detail.totalProgress;
-        updatingBar.style.width = `${pct * 100}%`;
+        upd.style.width = `${pct * 100}%`;
         if (pct === 1) {
-          progressBar.classList.add('hide');
+          bar.classList.add('hide');
           event.target.removeEventListener('progress', onProgress);
-          addLog('3D model fully loaded ✓');
-        } else {
-          progressBar.classList.remove('hide');
-          if (pct > 0 && pct < 1) addLog(`Loading… ${Math.round(pct*100)}%`);
-        }
+          log('Model loaded ✓');
+        } else { bar.classList.remove('hide'); }
       };
       mv.addEventListener('progress', onProgress);
 
-      /* ─────────────────────────────────────────
-         MATERIAL OVERRIDE
-      ───────────────────────────────────────── */
+      /* ══ MATERIAL OVERRIDE ══ */
       mv.addEventListener('load', () => {
-        const materials = mv.model.materials;
-        materials.forEach((mat) => {
-          mat.pbrMetallicRoughness.setMetallicFactor(0.6);
-          mat.pbrMetallicRoughness.setRoughnessFactor(0.3);
+        mv.model.materials.forEach((m) => {
+          m.pbrMetallicRoughness.setMetallicFactor(0.6);
+          m.pbrMetallicRoughness.setRoughnessFactor(0.3);
         });
-        addLog(`Materials applied — ${materials.length} surface(s)`);
-        mv.classList.add('active-tracking');
+        log(`Materials applied — ${mv.model.materials.length} surface(s)`);
       });
 
-      /* ─────────────────────────────────────────
-         AUTO-ROTATE
-      ───────────────────────────────────────── */
+      /* ══ AR EVENTS ══ */
+      mv.addEventListener('ar-status', (e) => {
+        if (e.detail.status === 'session-started') { log('AR session started 🥽'); bumpStat('s-act','actions'); }
+        if (e.detail.status === 'failed') log('AR unavailable on this device');
+      });
+
+      /* ══ AUTO-ROTATE ══ */
       function toggleRotate() {
         rotating = !rotating;
         mv.autoRotate = rotating;
         rotateBtn.textContent = rotating ? '⟳ Авто эргэлт: ON' : '⟳ Авто эргэлт: OFF';
         rotateBtn.classList.toggle('active', rotating);
-        addLog(rotating ? 'Auto-rotate enabled' : 'Auto-rotate disabled');
+        log(rotating ? 'Auto-rotate on' : 'Auto-rotate off');
+        bumpStat('s-act','actions');
       }
 
-      /* ─────────────────────────────────────────
-         BACKGROUND SWITCHER
-      ───────────────────────────────────────── */
+      /* ══ BACKGROUND ══ */
       const bgClasses = ['bg-dark','bg-stone','bg-sky','bg-ember','bg-mist'];
-      const bgNames   = { 'bg-dark':'Dark Obsidian','bg-stone':'Stone','bg-sky':'Night Sky','bg-ember':'Ember','bg-mist':'Mist' };
+      const bgNames   = {'bg-dark':'Dark','bg-stone':'Stone','bg-sky':'Sky','bg-ember':'Ember','bg-mist':'Mist'};
       function setBg(cls, el) {
         bgClasses.forEach(c => mv.classList.remove(c));
         mv.classList.add(cls);
         document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
         el.classList.add('selected');
-        addLog(`Background: ${bgNames[cls]}`);
+        log(`Background → ${bgNames[cls]}`);
+        bumpStat('s-act','actions');
       }
 
-      /* ─────────────────────────────────────────
-         EXPLODE VIEW (morph scale trick)
-      ───────────────────────────────────────── */
-      let exploded = false;
-      function toggleExplode() {
-        exploded = !exploded;
-        const btn = document.getElementById('explode-btn');
-        btn.classList.toggle('active', exploded);
-        try {
-          const materials = mv.model.materials;
-          // We can't truly explode without morph targets, but we simulate
-          // a dramatic exposure shift as a visual "reveal"
-          mv.exposure = exploded ? 1.2 : 0.5;
-          mv.shadowIntensity = exploded ? 3 : 2;
-          addLog(exploded ? 'Explode view: enhanced lighting' : 'Explode view: restored');
-          showToast(exploded ? '⚡ Explode mode — enhanced reveal' : '⚡ Explode mode off');
-        } catch(e) {}
-      }
-
-      /* ─────────────────────────────────────────
-         WIREFRAME TOGGLE (via post-processing)
-      ───────────────────────────────────────── */
-      let wireframe = false;
-      function toggleWireframe() {
-        wireframe = !wireframe;
-        const btn = document.getElementById('wireframe-btn');
-        btn.classList.toggle('active', wireframe);
-        try {
-          const materials = mv.model.materials;
-          materials.forEach((mat) => {
-            if (wireframe) {
-              mat.pbrMetallicRoughness.setMetallicFactor(1.0);
-              mat.pbrMetallicRoughness.setRoughnessFactor(0.0);
-            } else {
-              mat.pbrMetallicRoughness.setMetallicFactor(0.6);
-              mat.pbrMetallicRoughness.setRoughnessFactor(0.3);
-            }
-          });
-          addLog(wireframe ? 'Wireframe mode: ultra-metallic' : 'Wireframe mode: off, materials restored');
-          showToast(wireframe ? '⬡ Wireframe-style rendering ON' : '⬡ Normal rendering restored');
-        } catch(e) {
-          addLog('Wireframe: model not yet loaded');
-        }
-      }
-
-      /* ─────────────────────────────────────────
-         RESET CAMERA
-      ───────────────────────────────────────── */
-      function resetCamera() {
-        mv.cameraOrbit  = '-341.7deg 89deg auto';
-        mv.fieldOfView  = '30deg';
-        mv.autoRotate   = false;
+      /* ══ RESET CAMERA ══ */
+      function resetCam() {
+        mv.cameraOrbit = '-341.7deg 89deg auto';
+        mv.fieldOfView = '30deg';
+        mv.autoRotate  = false;
         rotating = false;
         rotateBtn.textContent = '⟳ Авто эргэлт: OFF';
         rotateBtn.classList.remove('active');
-        addLog('Camera reset to default view');
-        showToast('⌖ Camera reset');
-        session.interactions++;
-        document.getElementById('stat-interactions').textContent = session.interactions;
-        pulseStat('stat-interactions');
+        log('Camera reset');
+        bumpStat('s-act','actions');
+        toast('⌖ Camera reset');
       }
 
-      /* ─────────────────────────────────────────
-         SCREENSHOT
-      ───────────────────────────────────────── */
+      /* ══ SCREENSHOT ══ */
       async function takeScreenshot() {
+        // White flash
+        flash.classList.add('on');
+        setTimeout(() => flash.classList.remove('on'), 160);
+
         try {
           const blob = await mv.toBlob({ idealAspect: true });
-          const url  = URL.createObjectURL(blob);
-          session.screenshotData = url;
-          document.getElementById('preview-img').src = url;
-          document.getElementById('screenshot-preview').classList.add('show');
-          addLog('Screenshot captured ✓');
-          session.interactions++;
-          document.getElementById('stat-interactions').textContent = session.interactions;
-          pulseStat('stat-interactions');
-        } catch(e) {
-          showToast('📷 Capture: draw a frame first by interacting with model');
-          addLog('Screenshot failed — interact with model first');
+          shotDataUrl = URL.createObjectURL(blob);
+          shotImg.src = shotDataUrl;
+          shotModal.classList.add('open');
+          bumpStat('s-shots','captures');
+          bumpStat('s-act','actions');
+          log(`Screenshot captured #${state.captures}`);
+          toast('📷 Frame captured!');
+        } catch (err) {
+          log('Capture failed — interact with model first');
+          toast('📷 Interact with model first, then capture');
         }
       }
 
-      function downloadScreenshot() {
-        if (!session.screenshotData) return;
+      function downloadShot() {
+        if (!shotDataUrl) return;
         const a = document.createElement('a');
-        a.href = session.screenshotData;
-        a.download = `mongolian-warrior-${Date.now()}.png`;
+        a.href = shotDataUrl;
+        a.download = `warrior-${Date.now()}.png`;
         a.click();
-        addLog('Screenshot downloaded');
-        showToast('⬇ Image saved!');
+        log('Screenshot downloaded');
+        toast('⬇ Image saved!');
       }
 
-      function closePreview() {
-        document.getElementById('screenshot-preview').classList.remove('show');
+      function closeModal() { shotModal.classList.remove('open'); }
+
+      /* ══ TOAST ══ */
+      let toastTmr;
+      function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(toastTmr);
+        toastTmr = setTimeout(() => el.classList.remove('show'), 2600);
       }
 
-      /* ─────────────────────────────────────────
-         AR EVENTS
-      ───────────────────────────────────────── */
-      mv.addEventListener('ar-status', (e) => {
-        if (e.detail.status === 'session-started') addLog('AR session started 🥽');
-        if (e.detail.status === 'failed') addLog('AR session failed — device may not support WebXR');
-      });
-
-      /* ─────────────────────────────────────────
-         TOAST
-      ───────────────────────────────────────── */
-      let toastTimeout;
-      function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('show');
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => t.classList.remove('show'), 2600);
-      }
-
-      /* ─────────────────────────────────────────
-         PARTICLE BACKGROUND
-      ───────────────────────────────────────── */
-      (function() {
-        const canvas = document.getElementById('particle-canvas');
-        const ctx    = canvas.getContext('2d');
-        let W, H, particles = [];
-
-        function resize() {
-          W = canvas.width  = window.innerWidth;
-          H = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function rand(a, b) { return Math.random() * (b - a) + a; }
-
-        class Particle {
-          constructor() { this.reset(); }
-          reset() {
-            this.x = rand(0, W);
-            this.y = rand(0, H);
-            this.r = rand(0.5, 1.8);
-            this.vx = rand(-0.15, 0.15);
-            this.vy = rand(-0.3, -0.05);
-            this.alpha = rand(0.1, 0.5);
-            this.life = rand(0.3, 1);
-          }
-          update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.life -= 0.0015;
-            if (this.life <= 0 || this.y < -5) this.reset();
-          }
-          draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha * this.life;
-            ctx.fillStyle = '#c9a84c';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-          }
-        }
-
-        for (let i = 0; i < 90; i++) particles.push(new Particle());
-
-        function loop() {
-          ctx.clearRect(0, 0, W, H);
-          particles.forEach(p => { p.update(); p.draw(); });
-          requestAnimationFrame(loop);
-        }
-        loop();
-      })();
+      log('Session started — loading model…');
     </script>
   </body>
 </html>
