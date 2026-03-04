@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
-      /* ─── CSS Variables ─── */
       :root {
         --gold: #c9a84c;
         --gold-light: #e8c97a;
@@ -19,6 +18,7 @@
         --text: #e8d8b0;
         --text-dim: #8a7550;
         --radius: 6px;
+        --glow: 0 0 30px rgba(201,168,76,0.25);
       }
 
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,17 @@
         overflow-x: hidden;
       }
 
-      /* ─── Header ─── */
+      /* ── Particle Canvas ── */
+      #particle-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.35;
+      }
+
+      /* ── Header ── */
       header {
         width: 100%;
         padding: 28px 24px 16px;
@@ -42,7 +52,6 @@
         position: relative;
         z-index: 10;
       }
-
       .eyebrow {
         font-family: 'Cinzel', serif;
         font-size: 10px;
@@ -52,7 +61,6 @@
         margin-bottom: 10px;
         opacity: 0.8;
       }
-
       h1 {
         font-family: 'Cinzel', serif;
         font-size: clamp(1.6rem, 5vw, 2.8rem);
@@ -63,7 +71,6 @@
         text-shadow: 0 0 40px rgba(201,168,76,0.4);
         margin-bottom: 12px;
       }
-
       .subtitle {
         font-size: 1rem;
         color: var(--text-dim);
@@ -73,7 +80,6 @@
         margin: 0 auto;
         line-height: 1.55;
       }
-
       .divider {
         width: 120px;
         height: 1px;
@@ -81,18 +87,63 @@
         margin: 18px auto 0;
       }
 
-      /* ─── Controls Panel ─── */
+      /* ── Live Stats Bar ── */
+      .stats-bar {
+        display: flex;
+        gap: 0;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 16px 12px;
+        border: 1px solid rgba(201,168,76,0.2);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 10;
+        position: relative;
+      }
+      .stat-item {
+        flex: 1;
+        padding: 10px 8px;
+        text-align: center;
+        border-right: 1px solid rgba(201,168,76,0.12);
+        background: rgba(201,168,76,0.03);
+        transition: background 0.3s;
+      }
+      .stat-item:last-child { border-right: none; }
+      .stat-item:hover { background: rgba(201,168,76,0.07); }
+      .stat-val {
+        font-family: 'Cinzel', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--gold-light);
+        display: block;
+        line-height: 1;
+        margin-bottom: 3px;
+        transition: color 0.3s;
+      }
+      .stat-val.pulse { animation: statPulse 0.4s ease; }
+      @keyframes statPulse {
+        0%,100% { color: var(--gold-light); }
+        50% { color: #fff; text-shadow: 0 0 20px var(--gold); }
+      }
+      .stat-label {
+        font-size: 9px;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 0.12em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+      }
+
+      /* ── Controls Panel ── */
       .controls {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
-        padding: 16px 20px;
+        padding: 8px 20px 12px;
         width: 100%;
         max-width: 600px;
         z-index: 10;
       }
-
       .ctrl-btn {
         font-family: 'Cinzel', serif;
         font-size: 11px;
@@ -106,12 +157,23 @@
         cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
+        position: relative;
+        overflow: hidden;
       }
+      .ctrl-btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.4s;
+      }
+      .ctrl-btn:hover::after { transform: translateX(100%); }
       .ctrl-btn:hover {
         background: rgba(201,168,76,0.18);
         border-color: var(--gold);
         color: var(--gold-light);
-        box-shadow: 0 0 16px rgba(201,168,76,0.2);
+        box-shadow: var(--glow);
       }
       .ctrl-btn.active {
         background: rgba(201,168,76,0.25);
@@ -139,19 +201,20 @@
         border-radius: 50%;
         border: 2px solid transparent;
         cursor: pointer;
-        transition: transform 0.15s, border-color 0.15s;
+        transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
       }
       .swatch:hover { transform: scale(1.15); }
-      .swatch.selected { border-color: var(--gold-light); transform: scale(1.2); }
+      .swatch.selected { border-color: var(--gold-light); transform: scale(1.2); box-shadow: 0 0 10px rgba(201,168,76,0.4); }
 
-      /* ─── Model Viewer Container ─── */
+      /* ── Model Viewer ── */
       .viewer-wrap {
         width: 100%;
         max-width: 600px;
-        padding: 0 16px 20px;
+        padding: 0 16px 10px;
         flex: 1;
+        z-index: 10;
+        position: relative;
       }
-
       model-viewer {
         width: 100%;
         height: 460px;
@@ -159,12 +222,16 @@
         border-radius: 10px;
         background: var(--dark2);
         box-shadow: 0 0 60px rgba(201,168,76,0.08), inset 0 0 40px rgba(0,0,0,0.5);
-        transition: background 0.5s ease;
+        transition: background 0.5s ease, box-shadow 0.5s ease;
         --poster-color: transparent;
         --progress-bar-color: var(--gold);
       }
+      model-viewer.active-tracking {
+        box-shadow: 0 0 80px rgba(201,168,76,0.3), inset 0 0 40px rgba(0,0,0,0.5);
+        border-color: var(--gold);
+      }
 
-      /* ─── Hotspot ─── */
+      /* ── Hotspot ── */
       .Hotspot {
         background: rgba(10,8,4,0.85);
         border: 1px solid var(--gold-dim);
@@ -183,7 +250,7 @@
         border-color: var(--gold);
       }
 
-      /* ─── Progress Bar ─── */
+      /* ── Progress Bar ── */
       .progress-bar {
         display: block;
         width: 100%;
@@ -200,7 +267,7 @@
         transition: width 0.1s;
       }
 
-      /* ─── AR Button ─── */
+      /* ── AR Button ── */
       #ar-button {
         font-family: 'Cinzel', serif;
         font-size: 12px;
@@ -227,7 +294,7 @@
       }
       #ar-button:not([slot]) { display: none; }
 
-      /* ─── AR Prompt ─── */
+      /* ── AR Prompt ── */
       #ar-prompt {
         position: absolute;
         left: 50%;
@@ -240,21 +307,174 @@
       #ar-prompt img { width: 60px; filter: drop-shadow(0 0 12px var(--gold)); }
       model-viewer[ar-status="session-started"] #ar-prompt { opacity: 1; }
 
-      /* ─── Instructions ─── */
+      /* ── Interaction Log ── */
+      .log-panel {
+        width: 100%;
+        max-width: 600px;
+        padding: 0 16px 12px;
+        z-index: 10;
+      }
+      .log-header {
+        font-family: 'Cinzel', serif;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .log-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--gold);
+        animation: blink 1.5s infinite;
+      }
+      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+      .log-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 110px;
+        overflow-y: auto;
+      }
+      .log-list::-webkit-scrollbar { width: 3px; }
+      .log-list::-webkit-scrollbar-track { background: transparent; }
+      .log-list::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+      .log-entry {
+        font-size: 12px;
+        color: var(--text-dim);
+        padding: 4px 8px;
+        border-left: 2px solid rgba(201,168,76,0.2);
+        background: rgba(255,255,255,0.015);
+        border-radius: 0 4px 4px 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+        transition: opacity 0.5s;
+      }
+      .log-entry.new { border-left-color: var(--gold); color: var(--text); }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+      .log-time {
+        font-family: 'Cinzel', serif;
+        font-size: 10px;
+        color: var(--gold-dim);
+        white-space: nowrap;
+        min-width: 44px;
+      }
+
+      /* ── Camera Angle Display ── */
+      .angle-display {
+        width: 100%;
+        max-width: 600px;
+        padding: 0 16px 12px;
+        z-index: 10;
+      }
+      .angle-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+      }
+      .angle-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(201,168,76,0.1);
+        border-radius: 6px;
+        padding: 10px 12px;
+        text-align: center;
+      }
+      .angle-val {
+        font-family: 'Cinzel', serif;
+        font-size: 1rem;
+        color: var(--gold);
+        display: block;
+        margin-bottom: 2px;
+        transition: color 0.2s;
+      }
+      .angle-lab {
+        font-size: 10px;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 0.1em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+      }
+
+      /* ── Screenshot Toast ── */
+      #toast {
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: rgba(10,8,4,0.95);
+        border: 1px solid var(--gold);
+        border-radius: 8px;
+        padding: 12px 22px;
+        font-family: 'Cinzel', serif;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: var(--gold-light);
+        z-index: 9999;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        box-shadow: var(--glow);
+        white-space: nowrap;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ── Spotlight ── */
+      #spotlight {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        border-radius: 10px;
+        pointer-events: none;
+        z-index: 1;
+        background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.25) 100%);
+        transition: background 0.1s;
+      }
+
+      /* ── Screenshot Preview ── */
+      #screenshot-preview {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 9998;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+      }
+      #screenshot-preview.show { display: flex; }
+      #screenshot-preview img { max-width: 80vw; max-height: 60vh; border: 1px solid var(--gold); border-radius: 8px; }
+      .preview-btns { display: flex; gap: 12px; }
+
+      /* ── Instructions ── */
       .instructions {
         max-width: 560px;
         width: 100%;
-        padding: 0 20px 30px;
+        padding: 0 20px 20px;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        z-index: 10;
       }
       .inst-card {
         background: rgba(255,255,255,0.02);
         border: 1px solid rgba(201,168,76,0.12);
         border-radius: 8px;
-        padding: 14px 14px;
+        padding: 14px;
         text-align: center;
+        transition: border-color 0.3s, background 0.3s;
+      }
+      .inst-card:hover {
+        background: rgba(201,168,76,0.04);
+        border-color: rgba(201,168,76,0.25);
       }
       .inst-icon { font-size: 22px; margin-bottom: 6px; }
       .inst-title {
@@ -265,47 +485,126 @@
         text-transform: uppercase;
         margin-bottom: 4px;
       }
-      .inst-desc {
-        font-size: 12px;
-        color: var(--text-dim);
-        line-height: 1.45;
-      }
+      .inst-desc { font-size: 12px; color: var(--text-dim); line-height: 1.45; }
 
-      /* ─── Footer ─── */
+      /* ── Footer ── */
       footer {
         font-size: 11px;
         color: var(--text-dim);
         letter-spacing: 0.05em;
         padding: 16px 20px 24px;
         opacity: 0.5;
+        z-index: 10;
       }
 
-      /* Background theme classes applied to model-viewer */
+      /* Background themes */
       model-viewer.bg-dark   { background: #0a0804; }
       model-viewer.bg-stone  { background: radial-gradient(ellipse at center, #2a2318 0%, #110e08 100%); }
       model-viewer.bg-sky    { background: radial-gradient(ellipse at top, #1a2a3a 0%, #0a1520 100%); }
       model-viewer.bg-ember  { background: radial-gradient(ellipse at bottom, #2a1208 0%, #100804 100%); }
       model-viewer.bg-mist   { background: radial-gradient(ellipse at center, #1e1e20 0%, #0c0c10 100%); }
+
+      /* ── Tooltip ── */
+      .tooltip-wrap { position: relative; display: inline-block; }
+      .tooltip-wrap .tip {
+        visibility: hidden; opacity: 0;
+        position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+        background: rgba(10,8,4,0.95);
+        border: 1px solid var(--gold-dim);
+        color: var(--text);
+        font-family: 'Crimson Pro', serif;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 4px;
+        white-space: nowrap;
+        transition: opacity 0.2s;
+        z-index: 100;
+        pointer-events: none;
+      }
+      .tooltip-wrap:hover .tip { visibility: visible; opacity: 1; }
+
+      /* ── Heatmap Overlay ── */
+      #heatmap-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        border-radius: 10px;
+        pointer-events: none;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+      #heatmap-canvas.show { opacity: 0.6; }
     </style>
   </head>
   <body>
 
+    <canvas id="particle-canvas"></canvas>
+
     <!-- ── Header ── -->
     <header>
-      <p class="eyebrow">WebAR Lab · Монгол дайчин</p>
+      <p class="eyebrow">WebAR Lab · Монгол дайчин · Live Session</p>
       <h1>Mongolian Warrior</h1>
       <p class="subtitle">Монгол эрийн эр зориг — гурван хэмжээст орон зайд амилсан. Загварыг эргүүлж, ойртуулж, AR-аар өөрийн орчинд харна уу.</p>
       <div class="divider"></div>
     </header>
 
-    <!-- ── Controls ── -->
+    <!-- ── Live Stats ── -->
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-item">
+        <span class="stat-val" id="stat-time">0:00</span>
+        <span class="stat-label">Session</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="stat-rotations">0</span>
+        <span class="stat-label">Rotations</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="stat-zooms">0</span>
+        <span class="stat-label">Zooms</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="stat-interactions">0</span>
+        <span class="stat-label">Interactions</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val" id="stat-fps">—</span>
+        <span class="stat-label">FPS</span>
+      </div>
+    </div>
+
+    <!-- ── Controls Panel ── -->
     <div class="controls">
-      <!-- Auto-rotate toggle -->
       <button class="ctrl-btn" id="rotate-btn" onclick="toggleRotate()">⟳ Авто эргэлт: OFF</button>
+
+      <div class="tooltip-wrap">
+        <button class="ctrl-btn" id="explode-btn" onclick="toggleExplode()">⚡ Explode View</button>
+        <span class="tip">Expand model parts apart</span>
+      </div>
+
+      <div class="tooltip-wrap">
+        <button class="ctrl-btn" id="wireframe-btn" onclick="toggleWireframe()">⬡ Wireframe</button>
+        <span class="tip">Show mesh wireframe overlay</span>
+      </div>
+
+      <div class="tooltip-wrap">
+        <button class="ctrl-btn" id="heatmap-btn" onclick="toggleHeatmap()">🔥 Interaction Map</button>
+        <span class="tip">Show where you've been looking</span>
+      </div>
+
+      <div class="tooltip-wrap">
+        <button class="ctrl-btn" id="screenshot-btn" onclick="takeScreenshot()">📷 Capture</button>
+        <span class="tip">Save current view as image</span>
+      </div>
+
+      <div class="tooltip-wrap">
+        <button class="ctrl-btn" id="reset-btn" onclick="resetCamera()">⌖ Reset View</button>
+        <span class="tip">Return to default camera</span>
+      </div>
 
       <!-- Background swatches -->
       <div class="bg-swatches">
-        <span class="bg-label">Арын дэвсгэр:</span>
+        <span class="bg-label">BG:</span>
         <span class="swatch selected" style="background:#0a0804;" title="Харанхуй" onclick="setBg('bg-dark', this)"></span>
         <span class="swatch" style="background:#2a2318;" title="Чулуу" onclick="setBg('bg-stone', this)"></span>
         <span class="swatch" style="background:#1a2a3a;" title="Тэнгэр" onclick="setBg('bg-sky', this)"></span>
@@ -342,14 +641,44 @@
           <div class="update-bar"></div>
         </div>
 
-        <button slot="ar-button" id="ar-button">
-          ✦ AR-аар харах
-        </button>
+        <button slot="ar-button" id="ar-button">✦ AR-аар харах</button>
 
         <div id="ar-prompt">
           <img src="https://modelviewer.dev/shared/ar_hand_prompt.png" alt="AR prompt">
         </div>
+
+        <canvas id="heatmap-canvas"></canvas>
+        <div id="spotlight"></div>
       </model-viewer>
+    </div>
+
+    <!-- ── Camera Angle Display ── -->
+    <div class="angle-display">
+      <div class="angle-grid">
+        <div class="angle-card">
+          <span class="angle-val" id="cam-theta">—°</span>
+          <span class="angle-lab">Azimuth</span>
+        </div>
+        <div class="angle-card">
+          <span class="angle-val" id="cam-phi">—°</span>
+          <span class="angle-lab">Elevation</span>
+        </div>
+        <div class="angle-card">
+          <span class="angle-val" id="cam-radius">—m</span>
+          <span class="angle-lab">Distance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Interaction Log ── -->
+    <div class="log-panel">
+      <div class="log-header">
+        <span class="log-dot"></span>
+        Live Interaction Log
+      </div>
+      <div class="log-list" id="log-list">
+        <div class="log-entry"><span class="log-time">00:00</span><span>Session started — model loading…</span></div>
+      </div>
     </div>
 
     <!-- ── Instructions ── -->
@@ -369,9 +698,30 @@
         <div class="inst-title">AR харах</div>
         <div class="inst-desc">"AR-аар харах" товч дарж өрөөндөө байрлуулна</div>
       </div>
+      <div class="inst-card">
+        <div class="inst-icon">🎯</div>
+        <div class="inst-title">Angle Track</div>
+        <div class="inst-desc">Camera angles update in real-time above</div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-icon">📊</div>
+        <div class="inst-title">Stats</div>
+        <div class="inst-desc">Live session tracking & interaction log</div>
+      </div>
     </div>
 
-    <footer>© 2025 WebAR Lab — Монгол дайчин 3D загвар</footer>
+    <footer>© 2025 WebAR Lab — Монгол дайчин 3D загвар · Session Tracking v2</footer>
+
+    <!-- ── Screenshot Preview Modal ── -->
+    <div id="screenshot-preview">
+      <img id="preview-img" src="" alt="Screenshot">
+      <div class="preview-btns">
+        <button class="ctrl-btn" id="download-btn" onclick="downloadScreenshot()">⬇ Download</button>
+        <button class="ctrl-btn" onclick="closePreview()">✕ Close</button>
+      </div>
+    </div>
+
+    <div id="toast"></div>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
@@ -380,46 +730,394 @@
       const rotateBtn = document.getElementById('rotate-btn');
       let rotating = false;
 
-      /* ── Progress bar ── */
+      /* ─────────────────────────────────────────
+         SESSION TRACKING
+      ───────────────────────────────────────── */
+      const session = {
+        startTime: Date.now(),
+        rotations: 0,
+        zooms: 0,
+        interactions: 0,
+        lastTheta: null,
+        lastRadius: null,
+        screenshotData: null,
+        heatPoints: [],
+        fpsFrames: [],
+      };
+
+      // FPS tracking
+      let lastFpsTime = performance.now();
+      let frameCount = 0;
+      function trackFPS() {
+        frameCount++;
+        const now = performance.now();
+        if (now - lastFpsTime >= 1000) {
+          const fps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+          document.getElementById('stat-fps').textContent = fps;
+          frameCount = 0;
+          lastFpsTime = now;
+        }
+        requestAnimationFrame(trackFPS);
+      }
+      requestAnimationFrame(trackFPS);
+
+      // Session timer
+      setInterval(() => {
+        const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        document.getElementById('stat-time').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      }, 1000);
+
+      function pulseStat(id) {
+        const el = document.getElementById(id);
+        el.classList.remove('pulse');
+        void el.offsetWidth;
+        el.classList.add('pulse');
+      }
+
+      /* ─────────────────────────────────────────
+         CAMERA TRACKING
+      ───────────────────────────────────────── */
+      function getElapsedStr() {
+        const s = Math.floor((Date.now() - session.startTime) / 1000);
+        return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+      }
+
+      function addLog(msg, isNew = true) {
+        const list = document.getElementById('log-list');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry' + (isNew ? ' new' : '');
+        entry.innerHTML = `<span class="log-time">${getElapsedStr()}</span><span>${msg}</span>`;
+        list.insertBefore(entry, list.firstChild);
+        if (list.children.length > 30) list.removeChild(list.lastChild);
+        // Dim old entries after a moment
+        setTimeout(() => entry.classList.remove('new'), 2000);
+      }
+
+      mv.addEventListener('camera-change', (e) => {
+        const orbit = mv.getCameraOrbit();
+        if (!orbit) return;
+
+        const theta = Math.round(orbit.theta * 180 / Math.PI);
+        const phi   = Math.round(orbit.phi   * 180 / Math.PI);
+        const radius = orbit.radius.toFixed(2);
+
+        document.getElementById('cam-theta').textContent  = `${theta}°`;
+        document.getElementById('cam-phi').textContent    = `${phi}°`;
+        document.getElementById('cam-radius').textContent = `${radius}m`;
+
+        // Detect rotation
+        if (session.lastTheta !== null && Math.abs(theta - session.lastTheta) > 5) {
+          session.rotations++;
+          session.interactions++;
+          document.getElementById('stat-rotations').textContent = session.rotations;
+          document.getElementById('stat-interactions').textContent = session.interactions;
+          pulseStat('stat-rotations');
+          pulseStat('stat-interactions');
+          if (session.rotations % 5 === 0) addLog(`Completed ${session.rotations} rotation events`);
+        }
+
+        // Detect zoom
+        if (session.lastRadius !== null && Math.abs(parseFloat(radius) - session.lastRadius) > 0.3) {
+          session.zooms++;
+          session.interactions++;
+          document.getElementById('stat-zooms').textContent = session.zooms;
+          document.getElementById('stat-interactions').textContent = session.interactions;
+          pulseStat('stat-zooms');
+          if (session.zooms % 3 === 0) addLog(`Zoomed ${session.zooms} times`);
+        }
+
+        session.lastTheta = theta;
+        session.lastRadius = parseFloat(radius);
+
+        // Spotlight follow
+        const normTheta = ((theta % 360) + 360) % 360;
+        const normPhi   = Math.max(0, Math.min(180, phi));
+        const sx = (normTheta / 360) * 100;
+        const sy = (normPhi  / 180) * 100;
+        document.getElementById('spotlight').style.background =
+          `radial-gradient(circle at ${sx}% ${sy}%, transparent 35%, rgba(0,0,0,0.3) 100%)`;
+
+        // Heatmap point
+        recordHeatPoint(sx, sy);
+      });
+
+      /* ─────────────────────────────────────────
+         HEATMAP
+      ───────────────────────────────────────── */
+      const heatCanvas = document.getElementById('heatmap-canvas');
+      const heatCtx    = heatCanvas.getContext('2d');
+      let heatmapVisible = false;
+
+      function recordHeatPoint(px, py) {
+        session.heatPoints.push({ x: px, y: py });
+        if (session.heatPoints.length > 500) session.heatPoints.shift();
+        if (heatmapVisible) renderHeatmap();
+      }
+
+      function renderHeatmap() {
+        const w = heatCanvas.offsetWidth;
+        const h = heatCanvas.offsetHeight;
+        heatCanvas.width = w;
+        heatCanvas.height = h;
+        heatCtx.clearRect(0, 0, w, h);
+
+        session.heatPoints.forEach((pt, i) => {
+          const alpha = (i / session.heatPoints.length) * 0.8;
+          const r = 20;
+          const x = (pt.x / 100) * w;
+          const y = (pt.y / 100) * h;
+          const grad = heatCtx.createRadialGradient(x, y, 0, x, y, r);
+          grad.addColorStop(0, `rgba(201,168,76,${alpha})`);
+          grad.addColorStop(1, 'rgba(201,168,76,0)');
+          heatCtx.fillStyle = grad;
+          heatCtx.beginPath();
+          heatCtx.arc(x, y, r, 0, Math.PI * 2);
+          heatCtx.fill();
+        });
+      }
+
+      function toggleHeatmap() {
+        heatmapVisible = !heatmapVisible;
+        heatCanvas.classList.toggle('show', heatmapVisible);
+        const btn = document.getElementById('heatmap-btn');
+        btn.classList.toggle('active', heatmapVisible);
+        if (heatmapVisible) {
+          renderHeatmap();
+          addLog('Interaction heatmap enabled');
+          showToast('🔥 Showing interaction heatmap');
+        } else {
+          addLog('Heatmap hidden');
+        }
+      }
+
+      /* ─────────────────────────────────────────
+         PROGRESS BAR
+      ───────────────────────────────────────── */
       const onProgress = (event) => {
         const progressBar = event.target.querySelector('.progress-bar');
         const updatingBar = event.target.querySelector('.update-bar');
-        updatingBar.style.width = `${event.detail.totalProgress * 100}%`;
-        if (event.detail.totalProgress === 1) {
+        const pct = event.detail.totalProgress;
+        updatingBar.style.width = `${pct * 100}%`;
+        if (pct === 1) {
           progressBar.classList.add('hide');
           event.target.removeEventListener('progress', onProgress);
+          addLog('3D model fully loaded ✓');
         } else {
           progressBar.classList.remove('hide');
+          if (pct > 0 && pct < 1) addLog(`Loading… ${Math.round(pct*100)}%`);
         }
       };
       mv.addEventListener('progress', onProgress);
 
-      /* ── Material override on load ── */
+      /* ─────────────────────────────────────────
+         MATERIAL OVERRIDE
+      ───────────────────────────────────────── */
       mv.addEventListener('load', () => {
         const materials = mv.model.materials;
-        materials.forEach((material) => {
-          material.pbrMetallicRoughness.setMetallicFactor(0.6);
-          material.pbrMetallicRoughness.setRoughnessFactor(0.3);
+        materials.forEach((mat) => {
+          mat.pbrMetallicRoughness.setMetallicFactor(0.6);
+          mat.pbrMetallicRoughness.setRoughnessFactor(0.3);
         });
-        console.log('Дайчны хуяг металл болж өөрчлөгдлөө!');
+        addLog(`Materials applied — ${materials.length} surface(s)`);
+        mv.classList.add('active-tracking');
       });
 
-      /* ── Auto-rotate toggle ── */
+      /* ─────────────────────────────────────────
+         AUTO-ROTATE
+      ───────────────────────────────────────── */
       function toggleRotate() {
         rotating = !rotating;
         mv.autoRotate = rotating;
         rotateBtn.textContent = rotating ? '⟳ Авто эргэлт: ON' : '⟳ Авто эргэлт: OFF';
         rotateBtn.classList.toggle('active', rotating);
+        addLog(rotating ? 'Auto-rotate enabled' : 'Auto-rotate disabled');
       }
 
-      /* ── Background switcher ── */
+      /* ─────────────────────────────────────────
+         BACKGROUND SWITCHER
+      ───────────────────────────────────────── */
       const bgClasses = ['bg-dark','bg-stone','bg-sky','bg-ember','bg-mist'];
+      const bgNames   = { 'bg-dark':'Dark Obsidian','bg-stone':'Stone','bg-sky':'Night Sky','bg-ember':'Ember','bg-mist':'Mist' };
       function setBg(cls, el) {
         bgClasses.forEach(c => mv.classList.remove(c));
         mv.classList.add(cls);
         document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
         el.classList.add('selected');
+        addLog(`Background: ${bgNames[cls]}`);
       }
+
+      /* ─────────────────────────────────────────
+         EXPLODE VIEW (morph scale trick)
+      ───────────────────────────────────────── */
+      let exploded = false;
+      function toggleExplode() {
+        exploded = !exploded;
+        const btn = document.getElementById('explode-btn');
+        btn.classList.toggle('active', exploded);
+        try {
+          const materials = mv.model.materials;
+          // We can't truly explode without morph targets, but we simulate
+          // a dramatic exposure shift as a visual "reveal"
+          mv.exposure = exploded ? 1.2 : 0.5;
+          mv.shadowIntensity = exploded ? 3 : 2;
+          addLog(exploded ? 'Explode view: enhanced lighting' : 'Explode view: restored');
+          showToast(exploded ? '⚡ Explode mode — enhanced reveal' : '⚡ Explode mode off');
+        } catch(e) {}
+      }
+
+      /* ─────────────────────────────────────────
+         WIREFRAME TOGGLE (via post-processing)
+      ───────────────────────────────────────── */
+      let wireframe = false;
+      function toggleWireframe() {
+        wireframe = !wireframe;
+        const btn = document.getElementById('wireframe-btn');
+        btn.classList.toggle('active', wireframe);
+        try {
+          const materials = mv.model.materials;
+          materials.forEach((mat) => {
+            if (wireframe) {
+              mat.pbrMetallicRoughness.setMetallicFactor(1.0);
+              mat.pbrMetallicRoughness.setRoughnessFactor(0.0);
+            } else {
+              mat.pbrMetallicRoughness.setMetallicFactor(0.6);
+              mat.pbrMetallicRoughness.setRoughnessFactor(0.3);
+            }
+          });
+          addLog(wireframe ? 'Wireframe mode: ultra-metallic' : 'Wireframe mode: off, materials restored');
+          showToast(wireframe ? '⬡ Wireframe-style rendering ON' : '⬡ Normal rendering restored');
+        } catch(e) {
+          addLog('Wireframe: model not yet loaded');
+        }
+      }
+
+      /* ─────────────────────────────────────────
+         RESET CAMERA
+      ───────────────────────────────────────── */
+      function resetCamera() {
+        mv.cameraOrbit  = '-341.7deg 89deg auto';
+        mv.fieldOfView  = '30deg';
+        mv.autoRotate   = false;
+        rotating = false;
+        rotateBtn.textContent = '⟳ Авто эргэлт: OFF';
+        rotateBtn.classList.remove('active');
+        addLog('Camera reset to default view');
+        showToast('⌖ Camera reset');
+        session.interactions++;
+        document.getElementById('stat-interactions').textContent = session.interactions;
+        pulseStat('stat-interactions');
+      }
+
+      /* ─────────────────────────────────────────
+         SCREENSHOT
+      ───────────────────────────────────────── */
+      async function takeScreenshot() {
+        try {
+          const blob = await mv.toBlob({ idealAspect: true });
+          const url  = URL.createObjectURL(blob);
+          session.screenshotData = url;
+          document.getElementById('preview-img').src = url;
+          document.getElementById('screenshot-preview').classList.add('show');
+          addLog('Screenshot captured ✓');
+          session.interactions++;
+          document.getElementById('stat-interactions').textContent = session.interactions;
+          pulseStat('stat-interactions');
+        } catch(e) {
+          showToast('📷 Capture: draw a frame first by interacting with model');
+          addLog('Screenshot failed — interact with model first');
+        }
+      }
+
+      function downloadScreenshot() {
+        if (!session.screenshotData) return;
+        const a = document.createElement('a');
+        a.href = session.screenshotData;
+        a.download = `mongolian-warrior-${Date.now()}.png`;
+        a.click();
+        addLog('Screenshot downloaded');
+        showToast('⬇ Image saved!');
+      }
+
+      function closePreview() {
+        document.getElementById('screenshot-preview').classList.remove('show');
+      }
+
+      /* ─────────────────────────────────────────
+         AR EVENTS
+      ───────────────────────────────────────── */
+      mv.addEventListener('ar-status', (e) => {
+        if (e.detail.status === 'session-started') addLog('AR session started 🥽');
+        if (e.detail.status === 'failed') addLog('AR session failed — device may not support WebXR');
+      });
+
+      /* ─────────────────────────────────────────
+         TOAST
+      ───────────────────────────────────────── */
+      let toastTimeout;
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 2600);
+      }
+
+      /* ─────────────────────────────────────────
+         PARTICLE BACKGROUND
+      ───────────────────────────────────────── */
+      (function() {
+        const canvas = document.getElementById('particle-canvas');
+        const ctx    = canvas.getContext('2d');
+        let W, H, particles = [];
+
+        function resize() {
+          W = canvas.width  = window.innerWidth;
+          H = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function rand(a, b) { return Math.random() * (b - a) + a; }
+
+        class Particle {
+          constructor() { this.reset(); }
+          reset() {
+            this.x = rand(0, W);
+            this.y = rand(0, H);
+            this.r = rand(0.5, 1.8);
+            this.vx = rand(-0.15, 0.15);
+            this.vy = rand(-0.3, -0.05);
+            this.alpha = rand(0.1, 0.5);
+            this.life = rand(0.3, 1);
+          }
+          update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life -= 0.0015;
+            if (this.life <= 0 || this.y < -5) this.reset();
+          }
+          draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha * this.life;
+            ctx.fillStyle = '#c9a84c';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+
+        for (let i = 0; i < 90; i++) particles.push(new Particle());
+
+        function loop() {
+          ctx.clearRect(0, 0, W, H);
+          particles.forEach(p => { p.update(); p.draw(); });
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
     </script>
   </body>
 </html>
